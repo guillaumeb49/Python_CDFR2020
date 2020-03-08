@@ -45,8 +45,6 @@ def DecodeTCP_Frame(data):
     data_decoded = {'id': 0, 'cmd': 0, 'code':0,'size_answer': 0, 'answer':0};
     data_unpacked = unpack('%dI' % int(len(data)/4), data);
 
-    print(len(data_unpacked));
-
     if(len(data_unpacked) >= 5):
         data_decoded["id"] = data_unpacked[0];
         data_decoded["code"] = data_unpacked[1];
@@ -56,6 +54,19 @@ def DecodeTCP_Frame(data):
     
 
     return data_decoded;
+
+
+#   @def : PrepareCMD_GetInfo(id)
+#   Prepare a TCP Frame to send a GET INFO command to the STM32
+#   @params :  - id: ID of the TCP frame
+#              - led_red:  1: turn on the RED LED, 0: turn off the RED LED, 2: do not modify current state of RED LED  
+#              - led_blue: 1: turn on the BLUE LED, 0: turn off the BLUE LED, 2: do not modify current state of BLUE LED   
+#              - led_green:1: turn on the GREEN LED, 0: turn off the GREEN LED, 2: do not modify current state of GREEN LED   
+#
+#   @return : return the TCP frame ready to be sent to the STM32
+def PrepareCMD_GetInfo(id):
+    frame_get_info = BuildTCP_Frame(id,0x01,0,None);
+    return frame_get_info;
 
 #   @def : PrepareCMD_SetLED(id, led_red,led_blue,led_green)
 #   Prepare a TCP Frame to send a SET LED command to the STM32
@@ -68,9 +79,10 @@ def DecodeTCP_Frame(data):
 def PrepareCMD_SetLED(id, led_red,led_blue,led_green):
     param = (led_red << 16) + (led_blue << 8) + (led_green)
 
-
     frame_set_led = BuildTCP_Frame(id,0x02,1,[param]);
     return frame_set_led;
+
+
 
 
 
@@ -128,7 +140,7 @@ def HandleTCP_STM32():
     print ("received data2:"+ repr(test_decoded_data))
     print ("received data: answer:"+ repr(test_decoded_data["answer"]))
 
-HandleTCP_STM32()
+    HandleTCP_STM32()
 
 
 
@@ -179,9 +191,9 @@ async def HandleWebSocketServer(websocket, path):
         await websocket.send(json.dumps(cmd))
         print(f"> {cmd}")
 
-start_server = websockets.serve(HandleWebSocketServer, "localhost", 1234)
+#start_server = websockets.serve(HandleWebSocketServer, "localhost", 1234)
 
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
+#asyncio.get_event_loop().run_until_complete(start_server)
+#asyncio.get_event_loop().run_forever()
 
 

@@ -118,7 +118,7 @@ def executeSomething(s):
 #
 #
 def HandleTCP_STM32():
-    TCP_IP = '192.168.0.50'
+    TCP_IP = '10.10.0.2'
     TCP_PORT = 7
     BUFFER_SIZE = 1024
     MESSAGE = "Hello, World!"

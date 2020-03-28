@@ -12,8 +12,6 @@ class Strategy:
 #------------------------------------------------------------------------------
     def run(self):
         """
-        2
-
         """
 
         # Start the virtual robot in a separete thread
@@ -44,7 +42,7 @@ class Strategy:
             print(f"> {answer}")
 
     def ManageUI(self):
-        start_server = websockets.serve(self.HandleWebSocketServer, "localhost", 1234)
+        start_server = websockets.serve(self.HandleWebSocketServer, "0.0.0.0", 1234)
 
         asyncio.get_event_loop().run_until_complete(start_server)
         asyncio.get_event_loop().run_forever()

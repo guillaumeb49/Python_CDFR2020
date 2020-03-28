@@ -40,7 +40,7 @@ class Robot:
             socket representing the connection with STM32
         """
         
-        TCP_IP = '192.168.0.50'
+        TCP_IP = '10.10.0.2'
         TCP_PORT = 7
         BUFFER_SIZE = 1024
 
@@ -70,7 +70,7 @@ class Robot:
         
         while (self.stop_thread_comm != 1):
 
-            # Get a command from the FIFO (block will no command available)
+            # Get a command from the FIFO (blocks while no command available)
             command = self.q.get()
             
             # Check for termination 
@@ -124,8 +124,6 @@ class Robot:
             while(str(id_last_cmd) not in  self.list_answers.keys()):
                 sleep(0.0005)
             
-            # If no answer within 100ms never mind... but log the error
-
             # Process the answer and Update all the value of this virtual Robot
             answer = self.list_answers.pop(str(id_last_cmd))
             self.distances = [answer['answer'][3], answer['answer'][4], answer['answer'][5], answer['answer'][6]]

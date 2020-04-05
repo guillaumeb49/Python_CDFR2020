@@ -24,8 +24,8 @@ from collections import namedtuple
 ##
 #   @def 
 #   @params:
-#       'id'            : id of the TCP packet
-#       'command_no'      : total number of bytes = id + nb_bytes + nb_parameters + param1 + param2 + ... + paramN
+#       'id'       : id of the TCP packet
+#       'cmd'      : cmd
 #       'nb_parameters' : N parameters
 #       'params':       : [param1, param2, .... paramN]
 def BuildTCP_Frame(id, command_no,nb_parameters,params):

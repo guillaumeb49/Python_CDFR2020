@@ -18,9 +18,12 @@ class Strategy:
         t0 = threading.Thread(target=self.robot.run)
         t0.start()
         
+        t1 = threading.Thread(target=self.manaManageStrategy)
+        t1.start()
 
         # Start the threads
         self.ManageUI()
+
 
 
     async def HandleWebSocketServer(self, websocket, path):
@@ -35,9 +38,22 @@ class Strategy:
             
             if(cmd['cmd'] == "getInfo"):
                 answer['answer'] = self.robot.GetDistances()
+            
             elif(cmd['cmd'] == "goToInit"):
                 answer['answer'] = 0
             
+            elif(cmd['cmd'] == "foward"):
+                answer['answer'] = self.robot.SetLeds(1,0,0)
+
+            elif(cmd['cmd'] == "backward"):
+                answer['answer'] = self.robot.SetLeds(0,1,0)
+            
+            elif(cmd['cmd'] == "left"):
+                answer['answer'] = self.robot.SetLeds(0,0,1)
+            
+            elif(cmd['cmd'] == "right"):
+                answer['answer'] = self.robot.SetLeds(0,0,1)
+
             await websocket.send(json.dumps(answer))
             print(f"> {answer}")
 
@@ -47,6 +63,9 @@ class Strategy:
         asyncio.get_event_loop().run_until_complete(start_server)
         asyncio.get_event_loop().run_forever()
 
+    def ManageStrategy(self):
+        #MARIO CODE!!!
+        #self.robot.SetLeds(0,0,1)
 
     
 

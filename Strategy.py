@@ -18,7 +18,7 @@ class Strategy:
         t0 = threading.Thread(target=self.robot.run)
         t0.start()
         
-        t1 = threading.Thread(target=self.manaManageStrategy)
+        t1 = threading.Thread(target=self.ManageStrategy)
         t1.start()
 
         # Start the threads
@@ -64,12 +64,7 @@ class Strategy:
         asyncio.get_event_loop().run_forever()
 
     def ManageStrategy(self):
-        #MARIO CODE!!!
-        #self.robot.SetLeds(0,0,1)
-
-    
-
-
+        a=1
 
 if __name__ == '__main__':
     s = Strategy()

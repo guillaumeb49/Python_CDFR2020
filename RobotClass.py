@@ -49,7 +49,7 @@ class Robot:
         try:
             self.socket_STM32.connect((TCP_IP, TCP_PORT))
         except socket.error as msg:
-            print("Caught exception socket.error : %s" % msg)
+            print("[Robot Class] Caught exception socket.error : %s" % msg)
             self.socket_STM32 = None
 
         return self.socket_STM32
@@ -129,10 +129,10 @@ class Robot:
             self.distances = [answer['answer'][3], answer['answer'][4], answer['answer'][5], answer['answer'][6]]
             end = time.time()
 
-            print("--------")
-            print(end - start)
-            print(repr(answer))
-            print("---------")
+            #print("--------")
+            #print(end - start)
+            #print(repr(answer))
+            #print("---------")
             
             # Sleep for 250ms
             sleep(0.250)
@@ -179,13 +179,15 @@ class Robot:
             1: turn on the LED, 0: turn off the LED, 2: do not modify current state of LED
         """
         # Store the ID of the command
-        id_last_cmd = self.id;
-            
+        id_last_cmd = self.id
+        print("*****************")
+        print("set LED" + str(led_red) + " "+ str(led_blue) + " " + str(led_green) )   
+        print("*****************") 
         # Increment the ID for the next command
         self.id = self.id + 1 
 
         # Add this command to the list of command to be sent
-        self.AppendCommand(PrepareCMD_SetLED(id_last_cmd, led_red,led_blue,led_green))
+        self.AppendCommand(com.PrepareCMD_SetLED(id_last_cmd, led_red,led_blue,led_green))
 
         # Return the ID of the command
         return id_last_cmd
@@ -261,6 +263,15 @@ class Robot:
 
     def GetDistances(self):
         return self.distances
+
+
+    def GetInfo(self):
+        info = {'current_position':self.current_position,'vecteurDeplacement':self.vecteurDeplacement,'next_position':self.next_position,'asservissement_status':self.asservissement_status,'ready_to_start':self.ready_to_start,'distances':self.distances,'tirette_status':self.tirette_status,'leds':self.leds,'servos_position':self.servos_position}
+        
+        return info
+
+
+
 #------------------------------------------------------------------------------
     def run(self):
         """
@@ -289,7 +300,7 @@ class Robot:
 
                 # if we have reached this limit we have already been waiting for 15 seconds
                 # Maybe the STM32 is not connected
-                print("Error: Connection to STM32 failed, check that cables")
+                print("Error: Connection to STM32 failed, check the cables")
             
         # The Socket is now opened
 
@@ -302,7 +313,8 @@ class Robot:
         t1.start()
         t2.start()
         
-        sleep(25)
+        while True:
+            sleep(500)
 
         self.stop_thread_debug = 1
         self.stop_thread_info = 1

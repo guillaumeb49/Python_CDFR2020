@@ -3,11 +3,23 @@ import asyncio
 import websockets
 import json
 import threading
-
+import time
+import socket
+from signal import signal, SIGINT
+from sys import exit
+import pickle
 
 class Strategy:
     robot       = Robot()
     socket_UI   = None
+    socketServer= None
+
+
+    def handler(self,signal_received, frame):
+        # Handle any cleanup here
+        print('SIGINT or CTRL-C detected. Exiting gracefully')
+        self.socketServer.close()
+        exit(0)
 
 #------------------------------------------------------------------------------
     def run(self):
@@ -21,51 +33,63 @@ class Strategy:
         t1 = threading.Thread(target=self.ManageStrategy)
         t1.start()
 
+        signal(SIGINT, self.handler)
+
         # Start the threads
         self.ManageUI()
 
+    def HandleBackEndSocketServer(self):
+        HOST = 'localhost'        
+        PORT = 50007              # Arbitrary non-privileged port
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as self.socketServer:
+            self.socketServer.bind((HOST, PORT))
+            self.socketServer.listen(1)
+            conn, addr = self.socketServer.accept()
+            with conn:
+                print('Connected by', addr)
+                while True:
+                    data = conn.recv(1024)
+                    if not data: 
+                        print("ERROR CONNEXION") 
+                        break
 
+                    cmd = pickle.loads(data);
 
-    async def HandleWebSocketServer(self, websocket, path):
-        while True:
-            cmd = await websocket.recv()
-            # Retreve JSON parsed data
-            cmd = json.loads(cmd);
+                    #print(f"< {cmd}")
 
-            print(f"< {cmd}")
+                    answer = {"type":"answer", "cmd":cmd['cmd'], "answer":''}
+                    
+                    if(cmd['cmd'] == "UpdateRobotUI"):
+                        answer['answer'] = self.robot.GetInfo()
 
-            answer = {"type":"answer", "id":cmd['id'], "cmd":cmd['cmd'], "answer":''}
-            
-            if(cmd['cmd'] == "getInfo"):
-                answer['answer'] = self.robot.GetDistances()
-            
-            elif(cmd['cmd'] == "goToInit"):
-                answer['answer'] = 0
-            
-            elif(cmd['cmd'] == "foward"):
-                answer['answer'] = self.robot.SetLeds(1,0,0)
+                    elif(cmd['cmd'] == "goToInit"):
+                        answer['answer'] = 0
+                    
+                    elif(cmd['cmd'] == "MoveStop"):
+                        answer['answer'] = self.robot.SetLeds(0,0,0)
 
-            elif(cmd['cmd'] == "backward"):
-                answer['answer'] = self.robot.SetLeds(0,1,0)
-            
-            elif(cmd['cmd'] == "left"):
-                answer['answer'] = self.robot.SetLeds(0,0,1)
-            
-            elif(cmd['cmd'] == "right"):
-                answer['answer'] = self.robot.SetLeds(0,0,1)
+                    elif(cmd['cmd'] == "MoveFoward"):
+                        answer['answer'] = self.robot.SetLeds(1,0,0)
+                
+                    elif(cmd['cmd'] == "MoveBackward"):
+                        answer['answer'] = self.robot.SetLeds(0,1,0)
+                    
+                    elif(cmd['cmd'] == "MoveLeft"):
+                        answer['answer'] = self.robot.SetLeds(0,0,1)
+                    
+                    elif(cmd['cmd'] == "MoveRight"):
+                        answer['answer'] = self.robot.SetLeds(0,0,1)
 
-            await websocket.send(json.dumps(answer))
-            print(f"> {answer}")
+                    conn.sendall(pickle.dumps(answer))
+                    #print(f"> {answer}")
 
     def ManageUI(self):
-        start_server = websockets.serve(self.HandleWebSocketServer, "0.0.0.0", 1234)
-
-        asyncio.get_event_loop().run_until_complete(start_server)
-        asyncio.get_event_loop().run_forever()
+        self.HandleBackEndSocketServer()
 
     def ManageStrategy(self):
         a=1
 
 if __name__ == '__main__':
+
     s = Strategy()
     s.run()

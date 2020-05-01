@@ -23,6 +23,7 @@ class Robot:
     stop_thread_debug       = 0
     stop_thread_comm        = 0
     stop_thread_info        = 0
+    stop_thread_monitor     = 0
     id                      = 0
     list_answers            = {}
     _sentinel               = object() 
@@ -84,6 +85,7 @@ class Robot:
             # Wait for the answer to be received
             answer = self.socket_STM32.recv(1024)
             
+            
             # Decode the answer received from the STM32
             answer = com.DecodeTCP_Frame(answer);
 
@@ -126,7 +128,9 @@ class Robot:
             
             # Process the answer and Update all the value of this virtual Robot
             answer = self.list_answers.pop(str(id_last_cmd))
-            self.distances = [answer['answer'][3], answer['answer'][4], answer['answer'][5], answer['answer'][6]]
+            self.current_position  = {"x":answer['answer'][0], "y": answer['answer'][1], "theta": answer['answer'][2]}
+            self.distances  = [answer['answer'][3], answer['answer'][4], answer['answer'][5], answer['answer'][6]]
+            self.leds       = [(answer['answer'][7]>> 0) & 1,(answer['answer'][7]>> 1) & 1,(answer['answer'][7]>> 2) & 1,(answer['answer'][7]>> 3) & 1,(answer['answer'][7]>> 4) & 1,(answer['answer'][7]>> 5) & 1,(answer['answer'][7]>> 6) & 1,(answer['answer'][7]>> 7) & 1] 
             end = time.time()
 
             #print("--------")
@@ -135,7 +139,7 @@ class Robot:
             #print("---------")
             
             # Sleep for 250ms
-            sleep(0.250)
+            sleep(0.100)
 
 
 
@@ -180,9 +184,7 @@ class Robot:
         """
         # Store the ID of the command
         id_last_cmd = self.id
-        print("*****************")
-        print("set LED" + str(led_red) + " "+ str(led_blue) + " " + str(led_green) )   
-        print("*****************") 
+
         # Increment the ID for the next command
         self.id = self.id + 1 
 
@@ -191,6 +193,30 @@ class Robot:
 
         # Return the ID of the command
         return id_last_cmd
+
+    def SetManualControl(self,new_position):
+        """
+        Set the value of the LEDs
+
+        Parameters
+        --------
+            - new_position:  0   = STOP
+                             1   = MOVE FORWARD
+                             2   = MOVE BACKWARD
+                             3   = MOVE LEFT
+                            4   = MOVE RIGHT
+        """
+        # Store the ID of the command
+        id_last_cmd = self.id
+
+        # Increment the ID for the next command
+        self.id = self.id + 1 
+
+        # Add this command to the list of command to be sent
+        self.AppendCommand(com.PrepareCMD_CMD_MANUAL_CTRL(id_last_cmd, new_position))
+
+        # Return the ID of the command
+        return id_last_cmd    
 
 
 #------------------------------------------------------------------------------
@@ -265,6 +291,8 @@ class Robot:
         return self.distances
 
 
+
+
     def GetInfo(self):
         info = {'current_position':self.current_position,'vecteurDeplacement':self.vecteurDeplacement,'next_position':self.next_position,'asservissement_status':self.asservissement_status,'ready_to_start':self.ready_to_start,'distances':self.distances,'tirette_status':self.tirette_status,'leds':self.leds,'servos_position':self.servos_position}
         
@@ -320,6 +348,7 @@ class Robot:
         self.stop_thread_info = 1
         self.q.put(self._sentinel)
         self.stop_thread_comm = 1
+        
          
 
         t0.join()

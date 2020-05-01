@@ -82,7 +82,21 @@ def PrepareCMD_SetLED(id, led_red,led_blue,led_green):
     frame_set_led = BuildTCP_Frame(id,0x02,1,[param]);
     return frame_set_led;
 
+#   @def : PrepareCMD_CMD_MANUAL_CTRL(id, new_position)
+#   Prepare a TCP Frame to send a new manual position command to the STM32
+#   @params :  - id: ID of the TCP frame
+#              - new_position:  0   = STOP
+#                               1   = MOVE FORWARD
+#                               2   = MOVE BACKWARD
+#                               3   = MOVE LEFT
+#                               4   = MOVE RIGHT
+#
+#   @return : return the TCP frame ready to be sent to the STM32
+def PrepareCMD_CMD_MANUAL_CTRL(id, new_position):
+    param = new_position
 
+    frame_new_position = BuildTCP_Frame(id,0x0D,1,[param]);
+    return frame_new_position;
 
 
 

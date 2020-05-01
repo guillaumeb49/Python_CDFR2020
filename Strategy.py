@@ -66,19 +66,19 @@ class Strategy:
                         answer['answer'] = 0
                     
                     elif(cmd['cmd'] == "MoveStop"):
-                        answer['answer'] = self.robot.SetLeds(0,0,0)
+                        answer['answer'] = self.robot.SetManualControl(0)
 
                     elif(cmd['cmd'] == "MoveFoward"):
-                        answer['answer'] = self.robot.SetLeds(1,0,0)
+                        answer['answer'] = self.robot.SetManualControl(1)
                 
                     elif(cmd['cmd'] == "MoveBackward"):
-                        answer['answer'] = self.robot.SetLeds(0,1,0)
+                        answer['answer'] = self.robot.SetManualControl(2)
                     
                     elif(cmd['cmd'] == "MoveLeft"):
-                        answer['answer'] = self.robot.SetLeds(0,0,1)
+                        answer['answer'] = self.robot.SetManualControl(3)
                     
                     elif(cmd['cmd'] == "MoveRight"):
-                        answer['answer'] = self.robot.SetLeds(0,0,1)
+                        answer['answer'] = self.robot.SetManualControl(4)
 
                     conn.sendall(pickle.dumps(answer))
                     #print(f"> {answer}")
